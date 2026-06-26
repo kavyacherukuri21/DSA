@@ -1,0 +1,66 @@
+import java.util.HashMap;
+public class LRUCache {  
+    private final int capacity;
+    private HashMap<Integer, Node> map;
+    private Node head;
+    private Node tail;
+    private static class Node {
+        int key;
+        int value;
+        Node prev;
+        Node next;
+        
+        public Node(int key, int value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+        public LRUCache (int capacity) {
+            this.capacity = capacity;
+            this.map = new HashMap<>();
+            this.head = new Node(0, 0);
+            this.tail = new Node(0, 0);
+            head.next = tail;
+            tail.prev = head;
+        }
+        public int get(int key) {
+            if (!map.containsKey(key)) {
+                return -1;
+            }
+            Node node = map.get(key);
+            remove(node);
+            insertAtTail(node);
+            return node.value;
+        }
+        public void put(int key, int val) {
+        if (map.containsKey(key)) remove(map.get(key));
+        if (map.size() == capacity) remove(head.next); // evict LRU
+        insertAtTail(new Node(key, val));
+    }
+
+    private void remove(Node node) {
+        map.remove(node.key);
+        node.prev.next = node.next;
+        node.next.prev = node.prev;
+    }
+
+    private void insertAtTail(Node node) {
+        map.put(node.key, node);
+        node.prev = tail.prev;
+        node.next = tail;
+        tail.prev.next = node;
+        tail.prev = node;
+    }
+     public static void main(String[] args) {
+        LRUCache cache = new LRUCache(3);
+        cache.put(1, 10);
+        cache.put(2, 20);
+        cache.put(3, 30);
+        System.out.println(cache.get(1)); // 10
+        cache.put(4, 40);                 // evicts 2
+        System.out.println(cache.get(2)); // -1
+        System.out.println(cache.get(3)); // 30
+        System.out.println(cache.get(4)); // 40
+    }
+}
+
